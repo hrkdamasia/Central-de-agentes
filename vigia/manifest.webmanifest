@@ -1,0 +1,17 @@
+{
+  "name": "Vigia · Agente Noturno",
+  "short_name": "Vigia",
+  "description": "Vigilância noturna do seu iPhone: fotografa quem mexer no aparelho.",
+  "lang": "pt-BR",
+  "start_url": "./#missao",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05080a",
+  "theme_color": "#05080a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

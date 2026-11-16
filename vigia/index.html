@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigia">
+<meta name="theme-color" content="#05080a">
+<title>Vigia · Agente Noturno</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="cv" hidden></canvas>
+
+<!-- ============ RECRUTAMENTO (primeiro uso) ============ -->
+<section id="setup" class="screen" hidden>
+  <div class="setup-in">
+    <img src="icons/icon-192.png" alt="" class="setup-logo">
+    <p class="kicker">Arquivo nº 001 · Recrutamento</p>
+    <h1>Bem-vindo, agente.</h1>
+    <p class="mut">Antes da primeira missão, defina seu codinome e o código de acesso. Só você conhece esse código.</p>
+    <div class="card">
+      <label for="s_name">Codinome</label>
+      <input id="s_name" maxlength="20" placeholder="Ex.: Coruja" autocomplete="off">
+      <label for="s_pin">Código de acesso (4 a 8 números)</label>
+      <input id="s_pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
+      <label for="s_pin2">Confirme o código</label>
+      <input id="s_pin2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
+    </div>
+    <p id="s_err" class="err"></p>
+    <button class="btn pri" id="s_save">Iniciar treinamento</button>
+  </div>
+</section>
+
+<!-- ============ APP COM ABAS ============ -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="top-row"><p class="kicker" id="hdr_kicker">Missão</p><span class="agent" id="hdr_agent">—</span></div>
+    <h1 id="hdr_title">Painel do agente</h1>
+  </header>
+
+  <main>
+    <!-- MISSÃO -->
+    <section class="tab" data-tab="missao" data-title="Painel do agente">
+      <div class="radar-card">
+        <div class="radar"><div class="sweep"></div><span class="blip"></span></div>
+        <div>
+          <p class="kicker">Status</p>
+          <p class="status" id="m_status">—</p>
+          <p class="mut small" id="m_window">—</p>
+        </div>
+      </div>
+      <button class="btn pri big" id="b_start"><svg><use href="#i-lupa"/></svg> Iniciar vigia</button>
+      <p class="mut small center">Deixe o app aberto na tela. Ele arma e desarma sozinho no horário da operação.</p>
+
+      <div class="stats">
+        <div class="stat"><span id="st_events">0</span><small>ocorrências</small></div>
+        <div class="stat"><span id="st_photos">0</span><small>evidências</small></div>
+        <div class="stat"><span id="st_last">—</span><small>última</small></div>
+      </div>
+
+      <button class="btn ghost" id="b_test"><svg><use href="#i-alvo"/></svg> Simulação (arma por 5 min)</button>
+    </section>
+
+    <!-- EVIDÊNCIAS -->
+    <section class="tab" data-tab="evidencias" data-title="Dossiê de evidências" hidden>
+      <div id="dossie"></div>
+    </section>
+
+    <!-- OPERAÇÃO -->
+    <section class="tab" data-tab="operacao" data-title="Parâmetros da operação" hidden>
+      <h2>Janela de vigilância</h2>
+      <div class="card">
+        <div class="two">
+          <div><label for="c_ini">Arma às</label><input id="c_ini" type="time"></div>
+          <div><label for="c_fim">Desarma às</label><input id="c_fim" type="time"></div>
+        </div>
+      </div>
+      <h2>Detecção</h2>
+      <div class="card">
+        <label for="c_sens">Sensibilidade ao movimento</label>
+        <select id="c_sens">
+          <option value="2.4">Baixa · só se pegarem o celular</option>
+          <option value="1.2">Média · recomendada</option>
+          <option value="0.6">Alta · qualquer toque</option>
+        </select>
+      </div>
+      <h2>Captura</h2>
+      <div class="card">
+        <div class="two">
+          <div><label for="c_int">Foto a cada</label>
+            <select id="c_int"><option value="5">5 s</option><option value="10">10 s</option><option value="30">30 s</option></select></div>
+          <div><label for="c_max">Máx. por ocorrência</label>
+            <select id="c_max"><option value="10">10</option><option value="20">20</option><option value="40">40</option></select></div>
+        </div>
+        <p class="mut small">Ao detectar movimento: 3 fotos imediatas, depois uma a cada intervalo até o código ser digitado.</p>
+      </div>
+      <h2>Código correto</h2>
+      <div class="card">
+        <label for="c_grace">Pausar a vigia por</label>
+        <select id="c_grace"><option value="30">30 minutos</option><option value="60">1 hora</option><option value="120">2 horas</option></select>
+      </div>
+    </section>
+
+    <!-- ALERTAS -->
+    <section class="tab" data-tab="alertas" data-title="Central de alertas" hidden>
+      <div class="memo">
+        <p class="kicker">Mensagem diária</p>
+        <p class="memo-txt">“Vamos ativar seu vigia noturno? 🌙”</p>
+      </div>
+      <div class="card">
+        <label for="c_lem">Horário do lembrete</label>
+        <input id="c_lem" type="time">
+      </div>
+      <button class="btn pri" id="b_ics"><svg><use href="#i-sino"/></svg> Ativar lembrete diário</button>
+      <ol class="steps">
+        <li>Toque no botão acima.</li>
+        <li>O Calendário do iPhone abre: toque em <b>Adicionar todos</b>.</li>
+        <li>Pronto. Todo dia, no horário escolhido, chega a notificação.</li>
+      </ol>
+      <p class="mut small">Mudou o horário? Apague o evento antigo no Calendário e toque no botão de novo.</p>
+    </section>
+
+    <!-- COFRE -->
+    <section class="tab" data-tab="cofre" data-title="Cofre e protocolo" hidden>
+      <h2>Protocolo antes da missão</h2>
+      <ul class="check" id="protocolo">
+        <li data-k="p1"><b>Bloqueio Automático → Nunca</b><span>Ajustes › Tela e Brilho. O vigia precisa da tela acesa.</span></li>
+        <li data-k="p2"><b>Acesso Guiado ligado</b><span>Ajustes › Acessibilidade › Acesso Guiado. Com o vigia aberto, aperte 3× o botão lateral → Iniciar. Ninguém sai do app.</span></li>
+        <li data-k="p3"><b>Celular no carregador</b><span>Tela para cima, num lugar fixo.</span></li>
+        <li data-k="p4"><b>Simulação feita</b><span>Aba Missão › Simulação. Espere 15 s e pegue o celular.</span></li>
+      </ul>
+
+      <h2>Instalar no iPhone</h2>
+      <div class="card small">
+        <p>No <b>Safari</b>, toque em <b>Compartilhar</b> <svg class="inl"><use href="#i-share"/></svg> → <b>Adicionar à Tela de Início</b>. O Vigia vira um app com ícone próprio e funciona sem internet.</p>
+      </div>
+
+      <h2>Credenciais</h2>
+      <div class="stack">
+        <button class="btn sec" id="b_name"><svg><use href="#i-user"/></svg> Trocar codinome</button>
+        <button class="btn sec" id="b_pin"><svg><use href="#i-cadeado"/></svg> Trocar código de acesso</button>
+        <button class="btn danger" id="b_wipe"><svg><use href="#i-lixo"/></svg> Destruir todas as evidências</button>
+      </div>
+      <p class="mut small center" style="margin-top:22px">As evidências ficam só neste iPhone, dentro do app. Abra uma foto e toque em “Salvar” para mandá-la ao Fotos/iCloud.</p>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button data-go="missao" class="on"><svg><use href="#i-lupa"/></svg><span>Missão</span></button>
+    <button data-go="evidencias"><svg><use href="#i-pasta"/></svg><span>Evidências</span></button>
+    <button data-go="operacao"><svg><use href="#i-alvo"/></svg><span>Operação</span></button>
+    <button data-go="alertas"><svg><use href="#i-sino"/></svg><span>Alertas</span></button>
+    <button data-go="cofre"><svg><use href="#i-cadeado"/></svg><span>Cofre</span></button>
+  </nav>
+</div>
+
+<!-- ============ MODO VIGIA ============ -->
+<div id="watch" hidden>
+  <div class="w-radar"><div class="sweep"></div></div>
+  <div class="w-clock" id="w_clock">00:00</div>
+  <div class="w-st" id="w_st">—</div>
+  <button class="w-exit" id="w_exit">Encerrar missão</button>
+</div>
+
+<!-- ============ TELA DE CÓDIGO ============ -->
+<div id="lock" hidden>
+  <svg class="lock-ic"><use href="#i-cadeado"/></svg>
+  <h3 id="l_title">Acesso restrito</h3>
+  <p class="mut" id="l_sub">Digite o código para continuar</p>
+  <div class="dots" id="l_dots"></div>
+  <div class="pad" id="l_pad"></div>
+  <button class="btn ghost slim" id="l_cancel" hidden>Cancelar</button>
+</div>
+
+<!-- ============ VISUALIZADOR / DIÁLOGO ============ -->
+<div id="viewer" hidden>
+  <div class="v-head"><span class="stamp">Confidencial</span><span id="v_cap" class="mono"></span></div>
+  <img id="v_img" alt="Evidência">
+  <div class="two"><button class="btn sec" id="v_save">Salvar no Fotos</button><button class="btn ghost" id="v_close">Fechar</button></div>
+</div>
+<div id="dialog" hidden>
+  <div class="dlg">
+    <h3 id="d_title"></h3>
+    <input id="d_input" maxlength="20" autocomplete="off">
+    <div class="two"><button class="btn ghost" id="d_no">Cancelar</button><button class="btn pri" id="d_ok">Salvar</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<!-- ============ ÍCONES ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/><path d="M7.5 10.5c1-1.6 2-2.2 3-2.2s2 .6 3 2.2c-1 1.6-2 2.2-3 2.2s-2-.6-3-2.2z"/></symbol>
+    <symbol id="i-pasta" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/><path d="M8 13h8M8 16h5"/></symbol>
+    <symbol id="i-alvo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+    <symbol id="i-sino" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-cadeado" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1.4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M4 9l8-4 8 4"/><path d="M6 9h12"/><circle cx="12" cy="14" r="3.2"/><path d="M6 21c.8-2.6 3.2-4 6-4s5.2 1.4 6 4"/></symbol>
+    <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></symbol>
+  </defs>
+</svg>
+
+<script type="module" src="js/app.js"></script>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#16251c"/><stop offset="1" stop-color="#05080a"/></radialGradient>
+    <radialGradient id="lens" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#1d3a28"/><stop offset="1" stop-color="#08120c"/></radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g stroke="#39ff88" stroke-opacity=".12" stroke-width="2" fill="none">
+    <circle cx="256" cy="256" r="200"/><circle cx="256" cy="256" r="140"/><line x1="56" y1="256" x2="456" y2="256"/><line x1="256" y1="56" x2="256" y2="456"/>
+  </g>
+  <line x1="300" y1="300" x2="410" y2="410" stroke="#c9a34a" stroke-width="44" stroke-linecap="round"/>
+  <circle cx="226" cy="226" r="118" fill="url(#lens)" stroke="#e8c867" stroke-width="22"/>
+  <path d="M146 226 Q226 160 306 226 Q226 292 146 226Z" fill="none" stroke="#39ff88" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="226" cy="226" r="28" fill="#39ff88"/><circle cx="216" cy="216" r="9" fill="#05080a"/>
+</svg>
